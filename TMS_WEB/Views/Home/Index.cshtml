@@ -1,0 +1,40 @@
+﻿@model TMS_WEB.Models.Employee
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+
+<hr />
+<div class="d-flex justify-content-center align-items-center" style="height: 60vh;">
+    <div class="card col-md-4">
+        <div class="card-body">
+            <form asp-action="Index" method="post">
+                <div class="form-group my-2">
+                    <label class="control-label py-2">Select Your Profile</label>
+                    <select asp-for="Id" asp-items="@ViewBag.EmployeeList" class="form-control form-select my-3"></select>
+                </div>
+                <div class="form-group text-right">
+                    <input type="submit" value="Submit" class="btn btn-primary" />
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<small>Tasks opens based on the profile selection
+    <ul>
+        <li>Admin can view/update all the tasks.</li>
+        <li>Team Manager can only view/update the tasks that are assigned to their team.</li>
+        <li>Team Member can only view/update the tasks that are assigned to them.</li>
+    </ul>
+</small>
+
+
+
+
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

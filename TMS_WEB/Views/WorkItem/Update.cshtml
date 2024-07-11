@@ -1,0 +1,216 @@
+﻿@model TMS_WEB.Viewmodel.VMWorkItemUpdate
+@{
+    ViewData["Title"] = "Update";
+}
+
+<h3>Work Item Details</h3>
+
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <form asp-action="Update" enctype="multipart/form-data">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="row pb-3">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="WorkItem.Id" class="control-label"></label>
+                        <input asp-for="WorkItem.Id" class="form-control" />
+                        <span asp-validation-for="WorkItem.Id" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="WorkItem.Description" class="control-label"></label>
+                        <input asp-for="WorkItem.Description" class="form-control" />
+                        <span asp-validation-for="WorkItem.Description" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="WorkItem.Status" class="control-label"></label>
+                        <select asp-for="WorkItem.Status" class="form-control form-select">
+                            <option value="1">New</option>
+                            <option value="2">In Progress</option>
+                            <option value="3">Completed</option>
+                        </select>
+                        <span asp-validation-for="WorkItem.Status" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="WorkItem.CreationDate" class="control-label"></label>
+                        <input asp-for="WorkItem.CreationDate" class="form-control" />
+                        <span asp-validation-for="WorkItem.CreationDate" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="WorkItem.Duedate" class="control-label"></label>
+                        <input asp-for="WorkItem.Duedate" class="form-control" />
+                        <span asp-validation-for="WorkItem.Duedate" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label asp-for="WorkItem.AssignedTo" class="control-label"></label>
+                        <select asp-for="WorkItem.AssignedTo" class="form-control form-select" asp-items="Model.EmployeeList"></select>
+                        <span asp-validation-for="WorkItem.AssignedTo" class="text-danger"></span>
+                    </div>
+                </div>
+
+            </div>
+            @if (Model.WorkAttachmentList != null)
+            {
+                <div class="form-group pb-3">
+                    <h3 class="py-3">Attachments</h3>
+                    <ul class="list-group">
+                        @foreach (var attachment in Model.WorkAttachmentList)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                @attachment.FileName
+                                <button class="btn btn-outline-primary btn-sm downloadBtn" data-id="@attachment.Id">Download File</button>
+                            </li>
+                        }
+                    </ul>
+                </div>
+
+            }
+
+            <div class="d-flex justify-content-between align-items-center">
+                <h3 class="py-3">Work Notes</h3>
+
+                <button id="addNoteButton" type="button" class="btn btn-primary my-3">Add Note</button>
+                <button id="addAttachmentButton" type="button" class="btn btn-primary my-3">Add Attachment</button>
+                <button type="submit" value="Save" class="btn btn-primary ">Save</button>
+                <a asp-action="Index">Back to List</a>
+
+            </div>
+
+
+            @if (Model.WorkNoteList != null)
+            {
+                
+
+                <div id="addNoteForm" style="display: none;">
+                    <div class="form-group">
+                        <label>New Note</label>
+                        <input asp-for="WorkNote.Id" class="form-control" hidden />
+                        <input asp-for="WorkNote.WorkItemId" class="form-control" value="@Model.WorkItem.Id" hidden />
+                        <textarea asp-for="WorkNote.Content" class="form-control"></textarea>
+                    </div>
+                </div>
+
+                <div id="addAttachmentForm" style="display:none;">
+                    <div class="form-group">
+                        <label>Attachments</label>
+                        <input asp-for="fileUploadViewModel.Id" class="form-control" hidden />
+                        <input asp-for="fileUploadViewModel.WorkItemId" class="form-control" value="@Model.WorkItem.Id" hidden />
+                        <label asp-for="fileUploadViewModel.Filedata" class="control-label">Add Attachment</label>
+                        <input asp-for="fileUploadViewModel.Filedata" class="form-control" type="file" id="fileInput" />
+                        <span asp-validation-for="fileUploadViewModel.Filedata" class="text-danger"></span>
+
+                        <input asp-for="fileUploadViewModel.FileName" type="hidden" id="fileNameInput" />
+                        <input asp-for="fileUploadViewModel.Uploaddate" type="hidden" value="@DateTime.Now" />
+                        <input asp-for="fileUploadViewModel.UploadedBy" type="hidden" value="1" />
+                    </div>
+                </div>
+
+
+                @foreach (var note in Model.WorkNoteList)
+                {
+                    <div class="form-group py-2">
+                        <div class="card ">
+                            <div class="card-body">
+                                <div class="media-body">
+                                    <small class="text-muted">@note.UpdateDate.ToString("MMMM dd, yyyy")</small>
+                                    <h6 class="mt-0 mb-1">@note.Content</h6>
+                                    <small class="text-muted">Work Note Added By: @Model.EmpList.FirstOrDefault(x=>x.Id==note.UpdatedBy).EmployeeName</small>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                    
+                }
+
+            }  
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function () {
+
+            $('#addNoteButton').click(function () {
+                $('#addNoteButton').hide();
+                $('#addNoteForm').show();
+            });
+
+            $('#addAttachmentButton').click(function () {
+                $('#addAttachmentButton').hide();
+                $('#addAttachmentForm').show();
+            });
+
+            $('#fileInput').on('change', function () {
+                var fileName = this.files[0] ? this.files[0].name : '';
+                $('#fileNameInput').val(fileName);
+            });
+
+            $('.downloadBtn').click(function (event) {
+                event.preventDefault(); 
+
+                var id = $(this).data('id');
+                downloadFile(id);
+            });
+        });
+
+        async function downloadFile(id) {
+            debugger;
+            try {
+                const response = await fetch(`/WorkItem/DownloadAttachment/${id}`);
+                debugger;
+
+                if (!response.ok) {
+                    throw new Error(`Failed to download file. Status: ${response.status}`);
+                }
+
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+
+                // Handle filename from content-disposition header
+                let filename = 'downloaded_file.txt'; 
+                const contentDisposition = response.headers.get('content-disposition');
+                if (contentDisposition) {
+                    const filenameRegex = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/;
+                    const matches = filenameRegex.exec(contentDisposition);
+                    if (matches != null && matches[1]) {
+                        filename = decodeURIComponent(matches[1].replace(/['"]/g, ''));
+                    }
+                }
+
+                a.href = url;
+                a.download = filename;
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                a.remove();
+            } catch (error) {
+                console.error('Download request failed:', error);
+            }
+        }
+
+
+
+
+        
+    </script>
+}
